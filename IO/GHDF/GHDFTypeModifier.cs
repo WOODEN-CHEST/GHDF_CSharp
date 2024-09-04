@@ -3,5 +3,5 @@
 [Flags]
 public enum GHDFTypeModifier
 {
-    Array = 0b1000_000
+    Array = 0b1000_0000
 }

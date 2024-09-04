@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using GHEngine.IO.GHDF;
+using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GHEngine.IO.GHDF;
 
@@ -13,7 +15,8 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
         set => Add(id, value);
     }
 
-    public IEnumerable<ulong> Keys => _entries.Keys;
+    public IEnumerable<ulong> IDs => _entries.Keys;
+
     public IEnumerable<object> Values => _entries.Values;
 
 
@@ -24,6 +27,10 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
     // Methods.
     public void Add(ulong id, object value)
     {
+        if (value == null)
+        {
+            throw new ArgumentNullException(nameof(value));
+        }
         if (!IsValidType(value))
         {
             throw new GHDFEntryException("Invalid type for entry in compound.");
@@ -101,6 +108,8 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
         }
     }
 
+
+    // Inherited methods.
     public IEnumerator<KeyValuePair<ulong, object>> GetEnumerator()
     {
         return _entries.GetEnumerator();
