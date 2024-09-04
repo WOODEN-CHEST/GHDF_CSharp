@@ -11,7 +11,7 @@ public interface IGHDFReader
     // Static methods
     static IGHDFReader GetReaderVersion1()
     {
-        throw new NotImplementedException();
+        return new GHDFReaderVersion1();
     }
 
 

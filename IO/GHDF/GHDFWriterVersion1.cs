@@ -38,18 +38,18 @@ internal class GHDFWriterVersion1 : IGHDFWriter
 
     private void Write7BitEncodedInt(Stream stream, long value)
     {
-        const ulong MAX_SINGLE_BYTE_VALUE = 127;
-        const ulong ONE_BYTE_MASK = 0xff;
+        const byte MAX_SINGLE_BYTE_VALUE = 127;
+        const byte BYTE_MASK = 0b0111_1111;
+        const byte INDICATING_BIT = 0b1000_0000;
 
         ulong CurrentValue = (ulong)value;
         do
         {
-            ulong LongValueToWrite = CurrentValue;
+            byte ByteToWrite = (byte)(CurrentValue & BYTE_MASK);
             if (CurrentValue > MAX_SINGLE_BYTE_VALUE)
             {
-                LongValueToWrite |= (ulong)GHDFTypeModifier.Array;
+                ByteToWrite |= INDICATING_BIT;
             }
-            byte ByteToWrite = (byte)(LongValueToWrite & ONE_BYTE_MASK);
 
             stream.WriteByte(ByteToWrite);
 
