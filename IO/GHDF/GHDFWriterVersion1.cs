@@ -17,6 +17,38 @@ internal class GHDFWriterVersion1 : IGHDFWriter
 
     // Private fields.
     private readonly byte[] _signature = { 102, 37, 143, 181, 3, 205, 123, 185, 148, 157, 98, 177, 178, 151, 43, 170 };
+    private readonly Dictionary<Type, byte> _typeConversions = new()
+    {
+        { typeof(byte), (byte)GHDFType.UInt8 },
+        { typeof(sbyte), (byte)GHDFType.Int8 },
+        { typeof(short), (byte)GHDFType.Int16 },
+        { typeof(ushort), (byte)GHDFType.UInt16 },
+        { typeof(int), (byte)GHDFType.Int32 },
+        { typeof(uint), (byte)GHDFType.UInt32 },
+        { typeof(long), (byte)GHDFType.Int64 },
+        { typeof(ulong), (byte)GHDFType.UInt64 },
+        { typeof(float), (byte)GHDFType.Float },
+        { typeof(double), (byte)GHDFType.Double },
+        { typeof(string), (byte)GHDFType.String },
+        { typeof(bool), (byte)GHDFType.Boolean },
+        { typeof(GHDFCompound), (byte)GHDFType.Compound },
+        { typeof(GHDFEncodedInt), (byte)GHDFType.EncodedInt },
+
+        { typeof(byte[]), (byte)GHDFType.UInt8 | (byte)GHDFTypeModifier.Array },
+        { typeof(sbyte[]), (byte)GHDFType.Int8 | (byte)GHDFTypeModifier.Array },
+        { typeof(short[]), (byte)GHDFType.Int16 | (byte)GHDFTypeModifier.Array },
+        { typeof(ushort[]), (byte)GHDFType.UInt16 | (byte)GHDFTypeModifier.Array },
+        { typeof(int[]), (byte)GHDFType.Int32 | (byte)GHDFTypeModifier.Array },
+        { typeof(uint[]), (byte)GHDFType.UInt32 | (byte)GHDFTypeModifier.Array },
+        { typeof(long[]), (byte)GHDFType.Int64 | (byte)GHDFTypeModifier.Array },
+        { typeof(ulong[]), (byte)GHDFType.UInt64 | (byte)GHDFTypeModifier.Array },
+        { typeof(float[]), (byte)GHDFType.Float | (byte)GHDFTypeModifier.Array },
+        { typeof(double[]), (byte)GHDFType.Double | (byte)GHDFTypeModifier.Array },
+        { typeof(string[]), (byte)GHDFType.String | (byte)GHDFTypeModifier.Array },
+        { typeof(bool[]), (byte)GHDFType.Boolean | (byte)GHDFTypeModifier.Array },
+        { typeof(GHDFCompound[]), (byte)GHDFType.Compound | (byte)GHDFTypeModifier.Array },
+        { typeof(GHDFEncodedInt[]), (byte)GHDFType.EncodedInt | (byte)GHDFTypeModifier.Array }
+    };
 
 
     // Private methods.
@@ -188,121 +220,11 @@ internal class GHDFWriterVersion1 : IGHDFWriter
 
     private byte GetTypeOfObjectAsByte(object value)
     {
-        if (value is byte)
+        if (_typeConversions.TryGetValue(value.GetType(), out byte TypeByte))
         {
-            return (byte)GHDFType.UInt8;
+            return TypeByte;
         }
-        if (value is sbyte)
-        {
-            return (byte)GHDFType.Int8;
-        }
-        if (value is short)
-        {
-            return (byte)GHDFType.Int16;
-        }
-        if (value is ushort)
-        {
-            return (byte)GHDFType.UInt16;
-        }
-        if (value is int)
-        {
-            return (byte)GHDFType.Int32;
-        }
-        if (value is uint)
-        {
-            return (byte)GHDFType.UInt32;
-        }
-        if (value is long)
-        {
-            return (byte)GHDFType.Int64;
-        }
-        if (value is ulong)
-        {
-            return (byte)GHDFType.UInt64;
-        }
-        if (value is float)
-        {
-            return (byte)GHDFType.Float;
-        }
-        if (value is double)
-        {
-            return (byte)GHDFType.Double;
-        }
-        if (value is string)
-        {
-            return (byte)GHDFType.String;
-        }
-        if (value is bool)
-        {
-            return (byte)GHDFType.Boolean;
-        }
-        if (value is GHDFCompound)
-        {
-            return (byte)GHDFType.Compound;
-        }
-        if (value is GHDFEncodedInt)
-        {
-            return (byte)GHDFType.EncodedInt;
-        }
-
-        if (value is byte[])
-        {
-            return (byte)GHDFType.UInt8 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is sbyte[])
-        {
-            return (byte)GHDFType.Int8 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is short[])
-        {
-            return (byte)GHDFType.Int16 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is ushort[])
-        {
-            return (byte)GHDFType.UInt16 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is int[])
-        {
-            return (byte)GHDFType.Int32 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is uint[])
-        {
-            return (byte)GHDFType.UInt32 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is long[])
-        {
-            return (byte)GHDFType.Int64 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is ulong[])
-        {
-            return (byte)GHDFType.UInt64 | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is float[])
-        {
-            return (byte)GHDFType.Float | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is double[])
-        {
-            return (byte)GHDFType.Double | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is string[])
-        {
-            return (byte)GHDFType.String | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is bool[])
-        {
-            return (byte)GHDFType.Boolean | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is GHDFCompound[])
-        {
-            return (byte)GHDFType.Compound | (byte)GHDFTypeModifier.Array;
-        }
-        if (value is GHDFEncodedInt[])
-        {
-            return (byte)GHDFType.EncodedInt | (byte)GHDFTypeModifier.Array;
-        }
-
-        throw new GHDFWriteException($"Couldn't convert object type to byte, invalid type: {value?.GetType().FullName}");
+        throw new GHDFWriteException($"Couldn't convert object type to byte, invalid type: {value.GetType().FullName}");
     }
 
     private void WriteByte(Stream stream, byte value)
@@ -374,6 +296,10 @@ internal class GHDFWriterVersion1 : IGHDFWriter
             if (Entry.Key == 0)
             {
                 throw new GHDFWriteException("Invalid entry with ID of 0");
+            }
+            if (Entry.Value == null)
+            {
+                throw new GHDFWriteException($"Entry with ID {Entry.Key} is null");
             }
             try
             {

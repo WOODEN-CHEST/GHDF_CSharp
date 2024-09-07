@@ -39,6 +39,15 @@ internal class GHDFReaderVersion1 : IGHDFReader
         return ValueArray;
     }
 
+    private byte[] ToSystemEndianBytes(byte[] bytes)
+    {
+        if (!BitConverter.IsLittleEndian)
+        {
+            Array.Reverse(bytes);
+        }
+        return bytes;
+    }
+
     private long Read7BitEncodedInt(Stream stream)
     {
         ulong FinalValue = 0;
@@ -146,7 +155,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         {
             return isArray ? ReadArray(stream, ReadEncodedInt) : ReadEncodedInt(stream);
         }
-        throw new GHDFReadException($"Invalid entry type: {type} (IsArray: {isArray})");
+        throw new GHDFReadException($"Invalid entry type: {(int)type} (IsArray: {isArray})");
     }
 
     private byte ReadByte(Stream stream)
@@ -161,42 +170,50 @@ internal class GHDFReaderVersion1 : IGHDFReader
 
     private short ReadShort(Stream stream)
     {
-        return BitConverter.ToInt16(ReadByteArraySafe(stream, sizeof(short), "Expected Int16 value"));
+        return BitConverter.ToInt16(ToSystemEndianBytes(ReadByteArraySafe(stream, 
+            sizeof(short), "Expected Int16 value")));
     }
 
     private ushort ReadUShort(Stream stream)
     {
-        return BitConverter.ToUInt16(ReadByteArraySafe(stream, sizeof(ushort), "Expected UInt16 value"));
+        return BitConverter.ToUInt16(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(ushort), "Expected UInt16 value")));
     }
 
     private int ReadInt(Stream stream)
     {
-        return BitConverter.ToInt32(ReadByteArraySafe(stream, sizeof(int), "Expected Int32 value"));
+        return BitConverter.ToInt32(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(int), "Expected Int32 value")));
     }
 
     private uint ReadUInt(Stream stream)
     {
-        return BitConverter.ToUInt32(ReadByteArraySafe(stream, sizeof(uint), "Expected Int32 value"));
+        return BitConverter.ToUInt32(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(uint), "Expected Int32 value")));
     }
 
     private long ReadLong(Stream stream)
     {
-        return BitConverter.ToInt64(ReadByteArraySafe(stream, sizeof(long), "Expected Int64 value"));
+        return BitConverter.ToInt64(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(long), "Expected Int64 value")));
     }
 
     private ulong ReadULong(Stream stream)
     {
-        return BitConverter.ToUInt64(ReadByteArraySafe(stream, sizeof(ulong), "Expected UInt64 value"));
+        return BitConverter.ToUInt64(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(ulong), "Expected UInt64 value")));
     }
 
     private float ReadFloat(Stream stream)
     {
-        return BitConverter.ToSingle(ReadByteArraySafe(stream, sizeof(float), "Expected Float value"));
+        return BitConverter.ToSingle(ToSystemEndianBytes(ReadByteArraySafe(stream,
+            sizeof(float), "Expected Float value")));
     }
 
     private double ReadDouble(Stream stream)
     {
-        return BitConverter.ToDouble(ReadByteArraySafe(stream, sizeof(double), "Expected Double value"));
+        return BitConverter.ToDouble(ToSystemEndianBytes(ReadByteArraySafe(stream, 
+            sizeof(double), "Expected Double value")));
     }
 
     private bool ReadBool(Stream stream)
@@ -283,10 +300,6 @@ internal class GHDFReaderVersion1 : IGHDFReader
         VerifyMetadata(MemStream);
 
         GHDFCompound Compound = ReadCompound(MemStream);
-        if (MemStream.Position < MemStream.Length)
-        {
-            throw new GHDFReadException("Trailing data in GHDF stream");
-        }
         return Compound;
     }
 

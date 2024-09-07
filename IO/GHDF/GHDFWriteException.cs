@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GHEngine.IO.GHDF;
 
-internal class GHDFWriteException : IOException
+public class GHDFWriteException : IOException
 {
     public GHDFWriteException(string? message) : base(message) { }
 }

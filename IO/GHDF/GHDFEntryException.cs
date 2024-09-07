@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GHEngine.IO.GHDF;
 
-internal class GHDFEntryException : Exception
+public class GHDFEntryException : Exception
 {
     public GHDFEntryException(string? message) : base(message) { }
 }
