@@ -330,8 +330,8 @@ internal class GHDFWriterVersion1 : IGHDFWriter
     // Inherited methods.
     public void Write(string filePath, GHDFCompound compound)
     {
-        ArgumentNullException.ThrowIfNull(nameof(filePath));
-        string ModifiedPath = (Path.ChangeExtension(filePath, FILE_EXTENSION));
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+        string ModifiedPath = Path.ChangeExtension(filePath, FILE_EXTENSION);
 
         if (Directory.Exists(ModifiedPath))
         {
