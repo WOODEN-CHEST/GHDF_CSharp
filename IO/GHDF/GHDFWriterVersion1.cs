@@ -214,7 +214,7 @@ internal class GHDFWriterVersion1 : IGHDFWriter
         }
         else
         {
-            throw new GHDFWriteException($"Invalid type for value: {value?.GetType().FullName}");
+            throw new GHDFWriteInvalidTypeException($"Invalid type for value: {value?.GetType().FullName}");
         }
     }
 
@@ -224,7 +224,7 @@ internal class GHDFWriterVersion1 : IGHDFWriter
         {
             return TypeByte;
         }
-        throw new GHDFWriteException($"Couldn't convert object type to byte, invalid type: {value.GetType().FullName}");
+        throw new GHDFWriteInvalidTypeException($"Couldn't convert object type to byte, invalid type: {value.GetType().FullName}");
     }
 
     private void WriteByte(Stream stream, byte value)
@@ -295,22 +295,16 @@ internal class GHDFWriterVersion1 : IGHDFWriter
         {
             if (Entry.Key == 0)
             {
-                throw new GHDFWriteException("Invalid entry with ID of 0");
+                throw new GHDFWriteInvalidIDException("Invalid entry with ID of 0");
             }
             if (Entry.Value == null)
             {
-                throw new GHDFWriteException($"Entry with ID {Entry.Key} is null");
+                throw new GHDFWriteInvalidValueException($"Entry with ID {Entry.Key} is null");
             }
-            try
-            {
-                Write7BitEncodedInt(stream, (long)Entry.Key);
-                stream.WriteByte(GetTypeOfObjectAsByte(Entry.Value));
-                WriteSingleEntryValue(stream, Entry.Value);
-            }
-            catch (GHDFWriteException e)
-            {
-                throw new GHDFWriteException($"Failed to write entry with ID {Entry.Key} in compound: {{{e.Message}}}");
-            }
+
+            Write7BitEncodedInt(stream, (long)Entry.Key);
+            stream.WriteByte(GetTypeOfObjectAsByte(Entry.Value));
+            WriteSingleEntryValue(stream, Entry.Value);
         }
     }
     private void WriteEncodedInt(Stream stream, GHDFEncodedInt value)
@@ -335,7 +329,7 @@ internal class GHDFWriterVersion1 : IGHDFWriter
 
         if (Directory.Exists(ModifiedPath))
         {
-            throw new GHDFWriteException($"Given path \"{compound}\" points to a directory");
+            throw new GHDFWritePathException($"Given path \"{compound}\" points to a directory");
         }
 
         File.Delete(ModifiedPath);

@@ -24,7 +24,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         int Value = stream.ReadByte();
         if (Value == -1)
         {
-            throw new GHDFReadException(exceptionMsg ?? "Unexpected end of stream");
+            throw new GHDFReadEndOfStreamException(exceptionMsg ?? "Unexpected end of stream");
         }
         return (byte)Value;
     }
@@ -34,7 +34,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         byte[] ValueArray = new byte[count];
         if (stream.Read(ValueArray) != count)
         {
-            throw new GHDFReadException(exceptionMsg ?? "Unexpected end of stream");
+            throw new GHDFReadEndOfStreamException(exceptionMsg ?? "Unexpected end of stream");
         }
         return ValueArray;
     }
@@ -63,7 +63,8 @@ internal class GHDFReaderVersion1 : IGHDFReader
             CurrentByte = stream.ReadByte();
             if (CurrentByte == -1)
             {
-                throw new GHDFReadException($"Unexpected end of stream reading 7bit encoded integer on byte index {ReadByteCount}");
+                throw new GHDFReadEndOfStreamException("Unexpected end of stream " +
+                    $"reading 7bit encoded integer on byte index {ReadByteCount}");
             }
             FinalValue |= ((ulong)(CurrentByte & BIT_MASK) << (BITS_PER_BYTE * ReadByteCount));
             ReadByteCount++;
@@ -78,7 +79,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         byte[] ReadBytes = new byte[_signature.Length];
         if ((stream.Read(ReadBytes) < ReadBytes.Length) || !ReadBytes.SequenceEqual(_signature))
         {
-            throw new GHDFReadException("Invalid signature, not a GHDF container.");
+            throw new GHDFReadSignatureException("Invalid signature, not a GHDF container.");
         }
     }
 
@@ -87,7 +88,8 @@ internal class GHDFReaderVersion1 : IGHDFReader
         long Version = Read7BitEncodedInt(stream);
         if (Version != VERSION)
         {
-            throw new GHDFReadException($"Invalid GHDF container version, expected {VERSION}, got {Version}");
+            throw new GDHFReadVersionMismatchException($"Invalid GHDF container version, expected {VERSION}," +
+                $" got {Version}", VERSION, (int)Version);
         }
     }
 
@@ -155,7 +157,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         {
             return isArray ? ReadArray(stream, ReadEncodedInt) : ReadEncodedInt(stream);
         }
-        throw new GHDFReadException($"Invalid entry type: {(int)type} (IsArray: {isArray})");
+        throw new GHDFReadEntryTypeException($"Invalid entry type: {(int)type} (IsArray: {isArray})");
     }
 
     private byte ReadByte(Stream stream)
@@ -223,7 +225,7 @@ internal class GHDFReaderVersion1 : IGHDFReader
         {
             0 => false,
             1 => true,
-            _ => throw new GHDFReadException($"Invalid boolean type value: {ReadByte}")
+            _ => throw new GHDFReadInvalidValueException($"Invalid boolean type value: {ReadByte}")
         };
     }
 
@@ -255,25 +257,18 @@ internal class GHDFReaderVersion1 : IGHDFReader
         int TypeByte = stream.ReadByte();
         if (TypeByte == -1)
         {
-            throw new GHDFReadException("Expected type of entry, got end of stream");
+            throw new GHDFReadEndOfStreamException("Expected type of entry, got end of stream");
         }
 
         int RawTypeByte = TypeByte & (~(byte)GHDFTypeModifier.Array);
 
         if (!Enum.IsDefined(typeof(GHDFType), RawTypeByte))
         {
-            throw new GHDFReadException($"Invalid entry type: {TypeByte}");
+            throw new GHDFReadEntryTypeException($"Invalid entry type: {TypeByte}");
         }
 
-        try
-        {
-            bool IsArray = (TypeByte & (byte)GHDFTypeModifier.Array) != 0;
-            compound.Add(ID, ReadEntryByType(stream, (GHDFType)RawTypeByte, IsArray));
-        }
-        catch (IOException e)
-        {
-            throw new GHDFReadException($"Failed to read GHDF element with ID {ID} of type {TypeByte}. {e}");
-        }
+        bool IsArray = (TypeByte & (byte)GHDFTypeModifier.Array) != 0;
+        compound.Add(ID, ReadEntryByType(stream, (GHDFType)RawTypeByte, IsArray));
     }
 
     private GHDFCompound ReadCompound(Stream stream)
