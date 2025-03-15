@@ -293,13 +293,9 @@ internal class GHDFReaderVersion1 : IGHDFReader
     // Inherited methods.
     public GHDFCompound Read(Stream stream)
     {
-        MemoryStream MemStream = new MemoryStream();
-        stream.CopyTo(MemStream);
-        MemStream.Position = 0;
+        VerifyMetadata(stream);
 
-        VerifyMetadata(MemStream);
-
-        GHDFCompound Compound = ReadCompound(MemStream);
+        GHDFCompound Compound = ReadCompound(stream);
         return Compound;
     }
 
