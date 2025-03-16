@@ -33,7 +33,7 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
         }
         if (!IsValidType(value))
         {
-            throw new GHDFEntryException("Invalid type for entry in compound.");
+            throw new GHDFEntryTypeException("Invalid type for entry in compound.");
         }
         _entries[id] = value;
     }
@@ -87,7 +87,7 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
         {
             if (isVerified && !isOptional)
             {
-                throw new GHDFEntryException($"Entry with ID {id} not found");
+                throw new GHDFEntryNotFoundException($"Entry with ID {id} not found");
             }
             return false;
         }
@@ -102,7 +102,8 @@ public class GHDFCompound : IEnumerable<KeyValuePair<ulong, object>>
         {
             if (isVerified)
             {
-                throw new GHDFEntryException($"Entry with ID {id} is of type {Value.GetType().FullName}, expected {typeof(T).FullName}");
+                throw new GHDFEntryTypeException($"Entry with ID {id} is of type " +
+                    $"{Value.GetType().FullName}, expected {typeof(T).FullName}");
             }
             return false;
         }
