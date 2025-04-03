@@ -77,7 +77,11 @@ internal class GHDFReaderVersion1 : IGHDFReader
     private void VerifySignature(Stream stream)
     {
         byte[] ReadBytes = new byte[_signature.Length];
-        if ((stream.Read(ReadBytes) < ReadBytes.Length) || !ReadBytes.SequenceEqual(_signature))
+        if (stream.Read(ReadBytes) < ReadBytes.Length)
+        {
+            throw new GHDFReadEndOfStreamException("File signature is not complete, not a GHDF container.");
+        }
+        if (!ReadBytes.SequenceEqual(_signature))
         {
             throw new GHDFReadSignatureException("Invalid signature, not a GHDF container.");
         }
